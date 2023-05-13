@@ -1,10 +1,18 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace csharp
 {
     public class GildedRose
     {
-        IList<Item> Items;
+        private const int MAX_QUALITY = 50;
+        private const int MIN_QUALITY = 0;
+        private const string SULFURAS_ITEM_NAME = "Sulfuras, Hand of Ragnaros";
+        private const string AGED_BRIE_ITEM_NAME = "Aged Brie";
+        private const string BACKSTAGE_PASSES_ITEM_NAME = "Backstage passes to a TAFKAL80ETC concert";
+        private const int BACKSTAGE_PASSES_1ST_THRESHOLD = 10;
+        private const int BACKSTAGE_PASSES_2ND_THRESHOLD = 5;
+
+        private IList<Item> Items;
         public GildedRose(IList<Item> Items)
         {
             this.Items = Items;
@@ -12,78 +20,78 @@ namespace csharp
 
         public void UpdateQuality()
         {
-            for (var i = 0; i < Items.Count; i++)
+            foreach (var item in Items)
             {
-                if (Items[i].Name != "Aged Brie" && Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
+                UpdateItemQuality(item);
+                UpdateItemSellIn(item);
+            }
+        }
+
+        private void UpdateItemQuality(Item item)
+        {
+            if (item.Name == SULFURAS_ITEM_NAME)
+            {
+                return;
+            }
+
+            if (item.Name == AGED_BRIE_ITEM_NAME)
+            {
+                IncreaseQuality(item);
+                if (item.SellIn < 0)
                 {
-                    if (Items[i].Quality > 0)
-                    {
-                        if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                        {
-                            Items[i].Quality = Items[i].Quality - 1;
-                        }
-                    }
+                    IncreaseQuality(item);
                 }
-                else
+            }
+            else if (item.Name == BACKSTAGE_PASSES_ITEM_NAME)
+            {
+                IncreaseQuality(item);
+                if (item.SellIn <= BACKSTAGE_PASSES_1ST_THRESHOLD)
                 {
-                    if (Items[i].Quality < 50)
-                    {
-                        Items[i].Quality = Items[i].Quality + 1;
-
-                        if (Items[i].Name == "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].SellIn < 11)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-
-                            if (Items[i].SellIn < 6)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-                        }
-                    }
+                    IncreaseQuality(item);
                 }
-
-                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
+                if (item.SellIn <= BACKSTAGE_PASSES_2ND_THRESHOLD)
                 {
-                    Items[i].SellIn = Items[i].SellIn - 1;
+                    IncreaseQuality(item);
                 }
-
-                if (Items[i].SellIn < 0)
+                if (item.SellIn < 0)
                 {
-                    if (Items[i].Name != "Aged Brie")
-                    {
-                        if (Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].Quality > 0)
-                            {
-                                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                                {
-                                    Items[i].Quality = Items[i].Quality - 1;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Items[i].Quality = Items[i].Quality - Items[i].Quality;
-                        }
-                    }
-                    else
-                    {
-                        if (Items[i].Quality < 50)
-                        {
-                            Items[i].Quality = Items[i].Quality + 1;
-                        }
-                    }
+                    item.Quality = MIN_QUALITY;
+                }
+            }
+            else
+            {
+                DecreaseQuality(item);
+                if (item.SellIn < 0)
+                {
+                    DecreaseQuality(item);
                 }
             }
         }
+
+        private void UpdateItemSellIn(Item item)
+        {
+            if (item.Name != SULFURAS_ITEM_NAME)
+            {
+                item.SellIn -= 1;
+            }
+        }
+
+        private void IncreaseQuality(Item item)
+        {
+            if (item.Quality < MAX_QUALITY)
+            {
+                item.Quality += 1;
+            }
+        }
+
+        private void DecreaseQuality(Item item)
+        {
+            if (item.Quality > MIN_QUALITY)
+            {
+                item.Quality -= 1;
+            }
+        }
     }
+
+
 }
